@@ -5,8 +5,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY nova_webhook.py nova_core/
-COPY -r nova_core/ .
+COPY nova_webhook.py .
+COPY nova_core/ nova_core/
 
 ENV PORT=8080
 
