@@ -1,0 +1,14 @@
+[railway]
+  service = "nova-signal-processor"
+
+[railway.service]
+  healthCheckPath = "/health"
+  startCommand = "python nova_webhook.py"
+  internalPort = 8080
+
+[railway.variables]
+  PORT = "8080"
+  BOT_TOKEN = "8523785829:AAGnyoKSjFxfzWPvBx5ETm0qEVu6GXTAhfs"
+  SUPABASE_URL = "https://llqobekmngowvmwenpda.supabase.co"
+  GOLD_CHANNEL_ID = "-1003977021472"
+  WEBHOOK_SECRET = "verstige_signals_2026"
