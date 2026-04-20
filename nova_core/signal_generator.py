@@ -59,7 +59,7 @@ class TradeSignal:
     investor_views: List[InvestorView] = field(default_factory=list)
 
     # Execution
-    recommendation: str  # "EXECUTE" | "ALERT_ONLY" | "NO_TRADE"
+    recommendation: str = "ALERT_ONLY"  # "EXECUTE" | "ALERT_ONLY" | "NO_TRADE"
 
     def to_telegram_format(self) -> str:
         """Format signal for Telegram output — NOVA brief mode: 2-3 sentences."""
