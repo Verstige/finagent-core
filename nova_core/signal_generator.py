@@ -62,20 +62,54 @@ class TradeSignal:
     recommendation: str = "ALERT_ONLY"  # "EXECUTE" | "ALERT_ONLY" | "NO_TRADE"
 
     def to_telegram_format(self) -> str:
-        """Format signal for Telegram output — NOVA brief mode: 2-3 sentences."""
+        """Format signal for Telegram output — HTML parse_mode.
+        Matches the original Verstige signal card format."""
+        direction_label = "BUY ✅" if self.direction == "long" else "SELL ❌"
         emoji = "🟢" if self.direction == "long" else "🔴"
         conf_emoji = "🔥" if self.confidence == "HIGH" else "⚠️" if self.confidence == "MEDIUM" else "⏳"
 
-        lines = [
-            f"{emoji} **{self.direction.upper()}** {self.symbol} @ {self.entry_price:.2f}",
-            f"SL: {self.stop_loss:.2f} | TP: {self.take_profit:.2f} | **{self.risk_reward_ratio:.1f}:1 R:R**",
-            f"{conf_emoji} {self.confidence} confidence — {self.confluence_count}/6 confluences",
-            f"→ {self.recommendation}",
-        ]
+        entry = self.entry_price
+        direction_mult = 1 if self.direction == "long" else -1
 
+        # Pip calculation for XAUUSD: 1 pip = $0.10, so divide by 0.10
+        pip_value = 0.10
+        sl_pips = round(abs(entry - self.stop_loss) / pip_value, 1)
+        tp1_price = self.take_profit
+        tp2_price = round(entry + direction_mult * abs(entry - self.stop_loss) * 1.5, 2)
+        tp3_price = round(entry + direction_mult * abs(entry - self.stop_loss) * 3.0, 2)
+        tp1_pips = round(abs(tp1_price - entry) / pip_value, 1)
+        tp2_pips = round(abs(tp2_price - entry) / pip_value, 1)
+        tp3_pips = round(abs(tp3_price - entry) / pip_value, 1)
+
+        # Dominant investor archetype for strategy label
+        strategy_label = "Verstige Strategy™ + Investor Confluence"
         if self.investor_views:
-            dominant = max(self.investor_views, key=lambda v: v.conviction)
-            lines.append(f"🏛 {dominant.style.value.upper()}: {dominant.thesis}")
+            top = max(self.investor_views, key=lambda v: v.conviction)
+            strategy_label = f"{top.style.value.upper()} Framework"
+
+        from datetime import datetime
+
+        lines = [
+            f"{emoji} <b>{direction_label}</b> — <b>XAUUSD</b> ✨",
+            f"",
+            f"<b>Entry:</b> <code>{entry:.2f}</code>",
+            f"<b>Stop Loss:</b> <code>{self.stop_loss:.2f}</code> <i>({sl_pips:.0f} pips)</i>",
+            f"",
+            f"📍 <b>Take Profit Levels</b>",
+            f"├ 🥇 TP1: <code>{tp1_price:.2f}</code> <i>(+{tp1_pips:.0f} pips)</i>",
+            f"├ 🥈 TP2: <code>{tp2_price:.2f}</code> <i>(+{tp2_pips:.0f} pips)</i>",
+            f"└ 🥉 TP3: <code>{tp3_price:.2f}</code> <i>(+{tp3_pips:.0f} pips)</i>",
+            f"",
+            f"📊 <b>Risk : Reward</b>",
+            f"├ 1:1 → +{tp1_pips:.0f}p | 1:2 → +{tp2_pips:.0f}p | 1:6 → +{tp3_pips:.0f}p",
+            f"",
+            f"{conf_emoji} <b>{self.confidence}</b> confidence — {self.confluence_count}/6 confluences",
+            f"🧠 <b>Strategy:</b> {strategy_label}",
+            f"⏰ {datetime.utcnow().strftime('%I:%M %p EDT')}",
+            f"",
+            f"━━━━━━━━━━━━━━━━━━━━",
+            f"<i>Verstige OS Automated Signal</i>",
+        ]
 
         return "\n".join(lines)
 

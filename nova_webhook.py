@@ -91,7 +91,7 @@ async def send_telegram(message: str) -> bool:
     payload = {
         "chat_id": GOLD_CHANNEL_ID,
         "text": message,
-        "parse_mode": "Markdown",
+        "parse_mode": "HTML",
         "disable_web_page_preview": True,
     }
 
